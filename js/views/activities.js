@@ -14,7 +14,7 @@
 
   function render() {
     const sport = $("a-sport").value, level = $("a-level").value, area = $("a-area").value.trim().toLowerCase();
-    const list = SC.all().filter(a => SC.upcoming(a) && !st.blocked.includes(a.organizer) && (!sport || a.sport === sport) &&
+    const list = SC.all().filter(a => SC.upcoming(a) && !SC.isBlocked(a) && (!sport || a.sport === sport) &&
       (!level || a.level === level || a.level === "All levels") && (!area || a.area.toLowerCase().includes(area)));
     $("activity-list").innerHTML = list.length ? list.map(card).join("") : '<div class="empty">No activities match. Try other filters or create one.</div>';
   }

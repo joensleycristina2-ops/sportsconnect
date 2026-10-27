@@ -16,7 +16,21 @@
     document.getElementById("p-level").value = p.level || "Beginner";
     document.getElementById("p-area").value = p.area || "";
     SC.writeAvail(p.availability || []);
+    renderBlocked();
   }
+
+  function renderBlocked() {
+    const box = document.getElementById("p-blocked"), list = SC.state.blocked;
+    box.innerHTML = list.length ? list.map(b => `<div class="partner-row"><div class="partner-info"><div class="partner-name">${SC.esc(b.name)}</div></div>
+      <button class="secondary" data-unblock="${SC.esc(b.id)}">Unblock</button></div>`).join("")
+      : '<div class="partner-meta">You have not blocked anyone.</div>';
+  }
+  document.getElementById("p-blocked").addEventListener("click", async e => {
+    const b = e.target.closest("[data-unblock]");
+    if (!b) return;
+    await SC.api.unblock(b.dataset.unblock);
+    renderBlocked(); SC.toast("Unblocked");
+  });
 
   document.getElementById("save-profile").addEventListener("click", async () => {
     if (SC.needLogin("Sign in to save your profile")) return;

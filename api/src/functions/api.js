@@ -14,7 +14,7 @@ const route = (name, methods, path, guestOk, fn) => app.http(name, {
     try {
       const me = principal(req);
       if (!me && !guestOk) return json(401, { error: "Sign in first" });
-      if (me) await run(`MERGE Users AS t USING (SELECT @id AS Id) s ON t.Id = s.Id
+      if (me) await run(`MERGE Users WITH (HOLDLOCK) AS t USING (SELECT @id AS Id) s ON t.Id = s.Id
         WHEN NOT MATCHED THEN INSERT (Id, Name, Email) VALUES (@id, @name, @email);`, me);
       return await fn(req, me);
     } catch (e) { ctx.error(e); return json(500, { error: "Something went wrong" }); }
@@ -35,8 +35,9 @@ const joinActivity = (id, me) => inTx(async tx => {
   const [a] = await run(`SELECT a.Title, a.OrganizerId, a.StartsAt, a.MaxParticipants AS max,
       (SELECT COUNT(*) FROM Participants WITH (UPDLOCK, HOLDLOCK) WHERE ActivityId = a.Id AND Status = 'confirmed') AS n,
       (SELECT Status FROM Participants WHERE ActivityId = a.Id AND UserId = @uid) AS current
-    FROM Activities a WHERE a.Id = @id`, { id, uid: me.id }, tx);
-  if (!a) return { code: 404, error: "Activity not found" };
+    FROM Activities a WHERE a.Id = @id AND NOT EXISTS (SELECT 1 FROM Blocks b
+      WHERE (b.BlockerId = @uid AND b.BlockedId = a.OrganizerId) OR (b.BlockerId = a.OrganizerId AND b.BlockedId = @uid))`, { id, uid: me.id }, tx);
+  if (!a) return { code: 404, error: "Activity not found" };   // also when either person blocked the other
   if (a.OrganizerId === me.id) return { code: 400, error: "You organize this activity" };
   if (a.current) return { status: a.current };
   if (a.StartsAt <= new Date()) return { code: 400, error: "This activity has already started" };
@@ -56,14 +57,15 @@ route("bootstrap", ["GET"], "bootstrap", true, async (req, me) => {
     SELECT LOWER(CONVERT(VARCHAR(36), a.Id)) AS id, a.Title AS title, a.Sport AS sport, a.Level AS level, a.Area AS area,
       CASE WHEN a.OrganizerId = @id OR EXISTS (SELECT 1 FROM Participants p WHERE p.ActivityId = a.Id AND p.UserId = @id AND p.Status = 'confirmed')
         THEN a.Place END AS place,
-      CONVERT(CHAR(10), a.StartsAt, 23) AS date, CONVERT(CHAR(5), a.StartsAt, 108) AS time, a.MaxParticipants AS max,
+      CONVERT(VARCHAR(19), a.StartsAt, 126) + 'Z' AS startsAt, a.MaxParticipants AS max,
       (SELECT COUNT(*) FROM Participants p WHERE p.ActivityId = a.Id AND p.Status = 'confirmed' AND (a.OrganizerId = @id OR p.UserId <> @id)) AS joined,
       o.Name AS organizer,
       CAST(CASE WHEN a.OrganizerId = @id THEN 1 ELSE 0 END AS BIT) AS mine,
       CAST(CASE WHEN EXISTS (SELECT 1 FROM Invitations i WHERE i.ActivityId = a.Id AND i.InviteeEmail = @email) THEN 1 ELSE 0 END AS BIT) AS invited
     FROM Activities a JOIN Users o ON o.Id = a.OrganizerId
     WHERE a.StartsAt >= SYSUTCDATETIME()
-      AND NOT EXISTS (SELECT 1 FROM Blocks b WHERE b.BlockerId = @id AND b.BlockedId = a.OrganizerId)
+      AND NOT EXISTS (SELECT 1 FROM Blocks b    -- blocking works both ways
+        WHERE (b.BlockerId = @id AND b.BlockedId = a.OrganizerId) OR (b.BlockerId = a.OrganizerId AND b.BlockedId = @id))
     ORDER BY a.StartsAt`, p);
   const out = { user: null, profile: null, activities, joined: {}, responded: {}, notes: [], blocked: [] };
   if (!me) return json(200, out);
@@ -73,14 +75,14 @@ route("bootstrap", ["GET"], "bootstrap", true, async (req, me) => {
   for (const r of await run(`SELECT LOWER(CONVERT(VARCHAR(36), ActivityId)) AS id, Status FROM Invitations
     WHERE InviteeEmail = @email AND Status <> 'pending'`, p)) out.responded[r.id] = r.Status;
   out.notes = await run(`SELECT TOP 6 Text AS text, CreatedAt AS at FROM Notifications WHERE UserId = @id ORDER BY CreatedAt DESC`, p);
-  out.blocked = (await run(`SELECT u.Name AS name FROM Blocks b JOIN Users u ON u.Id = b.BlockedId WHERE b.BlockerId = @id`, p)).map(r => r.name);
+  out.blocked = await run(`SELECT b.BlockedId AS id, u.Name AS name FROM Blocks b JOIN Users u ON u.Id = b.BlockedId WHERE b.BlockerId = @id`, p);
   const [u] = await run(`SELECT Name, Sport, Level, Area, Availability FROM Users WHERE Id = @id`, p);
   out.profile = { name: u.Name, sport: u.Sport, level: u.Level, area: u.Area, availability: u.Availability ? JSON.parse(u.Availability) : [] };
   return json(200, out);
 });
 
 route("create", ["POST"], "activities", false, async (req, me) => {
-  const d = await req.json(), max = parseInt(d.max, 10), starts = new Date(d.date + "T" + d.time + ":00Z");
+  const d = await req.json(), max = parseInt(d.max, 10), starts = new Date(d.startsAt);   // UTC, converted by the browser
   if (!d.area || !d.place || Number.isNaN(starts.getTime()) || !(max >= 2 && max <= 100))
     return json(400, { error: "Add an area, a place, a date, a time and 2 to 100 participants." });
   if (!SPORTS.includes(d.sport) || !LEVELS.includes(d.level || "All levels")) return json(400, { error: "Choose a sport and level from the list." });
@@ -148,6 +150,11 @@ route("report", ["POST"], "reports", false, async (req, me) => {
   await run(`INSERT INTO Reports (ReporterId, ActivityId, Reason, Details) SELECT @uid, Id, @reason, @details FROM Activities WHERE Id = @aid`, p);
   if (d.block) await run(`INSERT INTO Blocks (BlockerId, BlockedId) SELECT @uid, a.OrganizerId FROM Activities a
     WHERE a.Id = @aid AND a.OrganizerId <> @uid AND NOT EXISTS (SELECT 1 FROM Blocks b WHERE b.BlockerId = @uid AND b.BlockedId = a.OrganizerId)`, p);
+  return json(200, { ok: true });
+});
+
+route("unblock", ["DELETE"], "blocks/{id}", false, async (req, me) => {
+  await run(`DELETE FROM Blocks WHERE BlockerId = @uid AND BlockedId = @bid`, { uid: me.id, bid: String(req.params.id).slice(0, 128) });
   return json(200, { ok: true });
 });
 

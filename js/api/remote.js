@@ -13,9 +13,10 @@
   }
   async function load() {
     const d = await call("GET", "/bootstrap");
-    SC.activities = d.activities;
-    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, created: [],
-      blocked: [] }); // the server already hides blocked organizers; matching by name here would also hide others with the same name
+    // The server stores UTC; show each activity in the viewer's own time zone.
+    SC.activities = d.activities.map(a => { const s = new Date(a.startsAt);
+      return Object.assign(a, { date: s.toLocaleDateString("en-CA"), time: s.toTimeString().slice(0, 5) }); });
+    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, blocked: d.blocked, created: [] });
   }
   const go = async (method, path, body) => { const r = await call(method, path, body); await load(); return r; };
   const leave = () => new Promise(() => {}); // the page navigates away
@@ -26,8 +27,9 @@
     signOut() { location.href = SC.config.logoutUrl; return leave(); },
     join: async id => (await go("POST", "/activities/" + id + "/join")).status,
     leave: id => go("DELETE", "/activities/" + id + "/join"),
-    createActivity: d => go("POST", "/activities", d),
+    createActivity: d => go("POST", "/activities", Object.assign({ startsAt: new Date(d.date + "T" + d.time).toISOString() }, d)),
     respond: async (id, accept, reason) => (await go("POST", "/activities/" + id + "/respond", { accept, reason })).status,
+    unblock: id => go("DELETE", "/blocks/" + encodeURIComponent(id)),
     report: (activityId, reason, details, block) => go("POST", "/reports", { activityId, reason, details, block }),
     saveProfile: p => go("PUT", "/profile", p)
   };
