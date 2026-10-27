@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SportsConnect</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/landing.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header>
+  <div class="brand"><div class="brand-mark"></div>SportsConnect</div>
+  <nav aria-label="Main">
+    <button data-view="home" class="active">Home</button>
+    <button data-view="activities">Activities</button>
+    <button data-view="discover">Partners</button>
+    <button data-view="sessions">Dashboard</button>
+    <button data-view="profile">Profile</button>
+  </nav>
+  <button class="ghost" id="auth-btn" type="button">Sign in</button>
+</header>
+
+<main>
+
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <div class="hero">
+      <h1>Train with the right person, <span>every time.</span></h1>
+      <p>SportsConnect matches individual sporters by skill, schedule and location — then handles the scheduling, so you can focus on training.</p>
+      <div class="hero-ctas">
+        <button class="cta" data-go="activities">Find an activity</button>
+        <button class="ghost" data-go="profile">Set up your profile</button>
+      </div>
+    </div>
+
+    <div class="section-label">Why SportsConnect</div>
+    <h2 class="section-heading">Built around the three things that actually matter</h2>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">&#128269;</div>
+        <h3>Smart matching</h3>
+        <p>Filter by sport, skill level and area so your first session isn't a mismatch.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128197;</div>
+        <h3>Effortless scheduling</h3>
+        <p>Send a request, agree on a time and place, and confirm — all in one flow.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#11088;</div>
+        <h3>Trusted partners</h3>
+        <p>Ratings and session history help you know who you're training with.</p>
+      </div>
+    </div>
+
+    <div class="section-label">How it works</div>
+    <h2 class="section-heading">From sign-up to your first session</h2>
+    <div class="card">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-text"><h4>Create your profile</h4><p>Add your sport, skill level and area.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-text"><h4>Browse matches</h4><p>Filter partners by sport, level and location.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-text"><h4>Send a request</h4><p>Connect with the partners you'd like to train with.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-text"><h4>Confirm and train</h4><p>Agree on a date, time and meeting point.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>SportsConnect &middot; a prototype built to explore partner matching for individual sporters</footer>
+  </section>
+
+  <!-- DISCOVER -->
+  <section id="discover" class="view">
+    <h1 class="page-title">Find a training partner</h1>
+    <p class="page-sub">Matched by sport, skill level and location.</p>
+    <div class="filters">
+      <select id="f-sport">
+        <option value="">All sports</option>
+        <option>Running</option><option>Tennis</option><option>Padel</option>
+        <option>Climbing</option><option>Cycling</option>
+      </select>
+      <select id="f-level">
+        <option value="">Any level</option>
+        <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+      <input type="text" id="f-area" placeholder="Area (e.g. Amsterdam)">
+    </div>
+    <div id="partner-list"></div>
+  </section>
+
+  <!-- SESSIONS -->
+  <section id="sessions" class="view">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">Your invitations, activities and notifications.</p>
+    <h2 class="section-heading">Notifications</h2>
+    <div class="card" id="notif-list"></div>
+    <h2 class="section-heading">My activities</h2>
+    <div id="dash-activities"></div>
+    <h2 class="section-heading">Partner requests</h2>
+    <div id="session-list"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profile" class="view">
+    <h1 class="page-title">My profile</h1>
+    <p class="page-sub">Shown to potential training partners.</p>
+    <div class="profile-form">
+      <div class="card">
+        <label class="field-label">Name</label>
+        <input type="text" id="p-name" placeholder="Your name">
+        <label class="field-label">Primary sport</label>
+        <select id="p-sport">
+          <option>Running</option><option>Tennis</option><option>Padel</option>
+          <option>Climbing</option><option>Cycling</option>
+        </select>
+        <label class="field-label">Skill level</label>
+        <select id="p-level">
+          <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+        </select>
+        <label class="field-label" for="p-area">General area (shown to others)</label>
+        <input type="text" id="p-area" placeholder="e.g. Amsterdam">
+        <label class="field-label">Weekly availability</label>
+        <div id="p-avail" class="avail" role="group" aria-label="Weekly availability"></div>
+        <div class="save-bar"><button class="primary" id="save-profile">Save profile</button></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ACTIVITIES -->
+  <section id="activities" class="view">
+    <h1 class="page-title">Find an activity</h1>
+    <p class="page-sub">Browse as a guest. Sign in to join or create an activity.</p>
+    <div class="filters">
+      <select id="a-sport" aria-label="Sport"><option value="">All sports</option><option>Running</option><option>Tennis</option><option>Padel</option><option>Climbing</option><option>Cycling</option></select>
+      <select id="a-level" aria-label="Level"><option value="">Any level</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+      <input type="text" id="a-area" placeholder="Area (e.g. Amsterdam)" aria-label="Area">
+      <button class="primary" data-go="create">Create activity</button>
+    </div>
+    <div id="activity-list"></div>
+  </section>
+
+  <!-- CREATE -->
+  <section id="create" class="view">
+    <h1 class="page-title">Create an activity</h1>
+    <p class="page-sub">Others see the general area. The exact place is shown to confirmed participants.</p>
+    <form id="c-form" class="card" novalidate>
+      <label class="field-label" for="c-title">Title (optional)</label><input type="text" id="c-title" name="title">
+      <label class="field-label" for="c-sport">Sport</label><select id="c-sport" name="sport"><option>Running</option><option>Tennis</option><option>Padel</option><option>Climbing</option><option>Cycling</option></select>
+      <label class="field-label" for="c-level">Level</label><select id="c-level" name="level"><option>All levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+      <label class="field-label" for="c-area">General area</label><input type="text" id="c-area" name="area" placeholder="e.g. Amsterdam">
+      <label class="field-label" for="c-place">Exact place</label><input type="text" id="c-place" name="place" placeholder="Address or meeting point">
+      <label class="field-label" for="c-date">Date</label><input type="date" id="c-date" name="date">
+      <label class="field-label" for="c-time">Time</label><input type="time" id="c-time" name="time">
+      <label class="field-label" for="c-max">Maximum participants</label><input type="number" id="c-max" name="max" min="2" value="8">
+      <label class="field-label" for="c-invite">Invite people</label><input type="text" id="c-invite" name="invite" placeholder="Names or emails, separated by commas">
+      <p class="error" id="c-error" role="alert"></p>
+      <div class="save-bar"><button type="button" class="ghost" data-go="activities">Cancel</button>&nbsp;<button class="primary" type="submit">Create and send invitations</button></div>
+    </form>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section id="auth" class="view">
+    <h1 class="page-title">Your account</h1>
+    <p class="page-sub">Sign in to join or create activities. Browsing is open to everyone.</p>
+    <div class="card">
+      <div class="tabs" role="group" aria-label="Account">
+        <button type="button" data-mode="signin" class="active">Sign in</button>
+        <button type="button" data-mode="register">Register</button>
+      </div>
+      <p class="notice" id="auth-msg" role="status" hidden></p>
+      <form id="f-signin" novalidate>
+        <label class="field-label" for="si-email">Email</label><input type="email" id="si-email" autocomplete="email">
+        <label class="field-label" for="si-pass">Password</label><input type="password" id="si-pass" autocomplete="current-password">
+        <div class="save-bar"><button class="primary" type="submit">Sign in</button></div>
+      </form>
+      <form id="f-register" hidden novalidate>
+        <label class="field-label" for="rg-name">Name</label><input type="text" id="rg-name" autocomplete="name">
+        <label class="field-label" for="rg-email">Email</label><input type="email" id="rg-email" autocomplete="email">
+        <label class="field-label" for="rg-pass">Password (at least 8 characters)</label><input type="password" id="rg-pass" autocomplete="new-password">
+        <label class="check"><input type="checkbox" id="rg-privacy"> I accept the privacy policy</label>
+        <div class="save-bar"><button class="primary" type="submit">Create account</button></div>
+      </form>
+      <p class="error" id="auth-err" role="alert"></p>
+      <button type="button" class="link" data-go="home">Just browse the home page</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg" aria-modal="true"></dialog>
+
+
+<script src="js/data.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/router.js"></script>
+<script src="js/api/local.js"></script>
+<script src="js/api/remote.js"></script>
+<script src="js/api/index.js"></script>
+<script src="js/views/discover.js"></script>
+<script src="js/views/sessions.js"></script>
+<script src="js/views/profile.js"></script>
+<script src="js/views/auth.js"></script>
+<script src="js/views/activities.js"></script>
+<script src="js/views/create.js"></script>
+<script src="js/views/dashboard.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
