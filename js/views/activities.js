@@ -6,7 +6,7 @@
     const mine = st.joined[a.id], n = a.joined + (mine === "confirmed" ? 1 : 0);
     return `<div class="card activity"><div class="activity-main">
       <div class="partner-name">${SC.esc(a.title)}</div>
-      <div class="partner-meta">${a.sport} &middot; ${a.level} &middot; ${SC.esc(a.area)}</div>
+      <div class="partner-meta">${SC.esc(a.sport)} &middot; ${SC.esc(a.level)} &middot; ${SC.esc(a.area)}</div>
       <div class="partner-meta">${SC.fmt(a)}</div>
       <div><span class="tag">${n} of ${a.max} joined</span>${mine ? ` <span class="status-pill ${mine === "waiting" ? "status-pending" : "status-confirmed"}">${mine === "waiting" ? "Waiting list" : "Joined"}</span>` : ""}</div>
     </div><button class="secondary" data-open="${a.id}">View</button></div>`;
@@ -14,7 +14,7 @@
 
   function render() {
     const sport = $("a-sport").value, level = $("a-level").value, area = $("a-area").value.trim().toLowerCase();
-    const list = SC.all().filter(a => !st.blocked.includes(a.organizer) && (!sport || a.sport === sport) &&
+    const list = SC.all().filter(a => SC.upcoming(a) && !st.blocked.includes(a.organizer) && (!sport || a.sport === sport) &&
       (!level || a.level === level || a.level === "All levels") && (!area || a.area.toLowerCase().includes(area)));
     $("activity-list").innerHTML = list.length ? list.map(card).join("") : '<div class="empty">No activities match. Try other filters or create one.</div>';
   }
@@ -25,7 +25,7 @@
     const action = a.mine ? '<span class="partner-meta">You organize this activity.</span>'
       : mine ? '<button class="secondary" id="d-leave">Leave activity</button>'
       : `<button class="primary" id="d-join">${spots > 0 ? "Join activity" : "Join waiting list"}</button>`;
-    const d = SC.dialog(`<h2>${SC.esc(a.title)}</h2><p class="partner-meta">${a.sport} &middot; ${a.level}</p>
+    const d = SC.dialog(`<h2>${SC.esc(a.title)}</h2><p class="partner-meta">${SC.esc(a.sport)} &middot; ${SC.esc(a.level)}</p>
       <dl class="facts"><dt>When</dt><dd>${SC.fmt(a)}</dd><dt>Area</dt><dd>${SC.esc(a.area)}</dd><dt>Exact place</dt><dd>${place}</dd>
       <dt>Spots left</dt><dd>${Math.max(spots, 0)} of ${a.max}</dd><dt>Organizer</dt><dd>${SC.esc(a.organizer)}</dd></dl>
       <div class="dlg-actions">${action}</div>${a.mine ? "" : '<button class="link" id="d-report">Report or block</button>'}`);

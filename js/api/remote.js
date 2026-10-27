@@ -14,7 +14,8 @@
   async function load() {
     const d = await call("GET", "/bootstrap");
     SC.activities = d.activities;
-    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, blocked: d.blocked, created: [] });
+    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, created: [],
+      blocked: [] }); // the server already hides blocked organizers; matching by name here would also hide others with the same name
   }
   const go = async (method, path, body) => { const r = await call(method, path, body); await load(); return r; };
   const leave = () => new Promise(() => {}); // the page navigates away
@@ -28,6 +29,6 @@
     createActivity: d => go("POST", "/activities", d),
     respond: async (id, accept, reason) => (await go("POST", "/activities/" + id + "/respond", { accept, reason })).status,
     report: (activityId, reason, details, block) => go("POST", "/reports", { activityId, reason, details, block }),
-    saveProfile: p => SC.state.user ? go("PUT", "/profile", p) : SC.needLogin("Sign in to save your profile")
+    saveProfile: p => go("PUT", "/profile", p)
   };
 })();

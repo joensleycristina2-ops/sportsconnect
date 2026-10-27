@@ -1,7 +1,7 @@
 (function () {
   "use strict";
   const KEY = "sportsconnect_state_v2", OLD = "sportsconnect_state_v1";
-  const base = { profile: null, sessions: [], user: null, users: [], joined: {}, created: [], notes: [], blocked: [], reports: [], responded: {} };
+  const base = { profile: null, sessions: [], user: null, users: [], joined: {}, created: [], notes: [], blocked: [], reports: [], responded: {}, accounts: {} };
   let saved = {};
   try {
     const raw = localStorage.getItem(KEY) || localStorage.getItem(OLD);
@@ -29,6 +29,7 @@
   SC.note = text => { SC.state.notes.unshift({ text, at: new Date().toISOString() }); };
   SC.all = () => SC.activities.concat(SC.state.created);
   SC.spots = a => a.max - a.joined - (SC.state.joined[a.id] === "confirmed" ? 1 : 0);
+  SC.upcoming = a => new Date(a.date + "T" + a.time) > new Date();
   SC.fmt = a => new Date(a.date + "T00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) + " \u00b7 " + a.time;
   // Prototype only: accounts live in this browser's localStorage, passwords are hashed but not salted.
   SC.hash = async s => {

@@ -9,6 +9,7 @@
     if (!g("area") || !g("place") || !g("date") || !g("time") || !(max >= 2)) {
       $("c-error").textContent = "Add an area, a place, a date, a time and at least 2 participants."; return;
     }
+    if (new Date(g("date") + "T" + g("time")) <= new Date()) { $("c-error").textContent = "Pick a date and time in the future."; return; }
     $("c-error").textContent = "";
     const invitees = g("invite").split(",").map(x => x.trim()).filter(Boolean);
     const r = await SC.api.createActivity({ title: g("title") || g("sport") + " session", sport: g("sport"), level: g("level"),

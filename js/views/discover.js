@@ -25,10 +25,10 @@
       const card = document.createElement("div");
       card.className = "card partner-row";
       card.innerHTML = `
-        <div class="avatar">${SC.initials(p.name)}</div>
+        <div class="avatar">${SC.esc(SC.initials(p.name))}</div>
         <div class="partner-info">
-          <div class="partner-name">${p.name}</div>
-          <div class="partner-meta">${p.sport} &middot; ${p.level} &middot; ${p.area}</div>
+          <div class="partner-name">${SC.esc(p.name)}</div>
+          <div class="partner-meta">${SC.esc(p.sport)} &middot; ${SC.esc(p.level)} &middot; ${SC.esc(p.area)}</div>
           <div class="tag">&#9733; ${p.rating.toFixed(1)}</div>
         </div>
         <button class="primary" data-id="${p.id}" ${alreadySent ? "disabled" : ""}>
