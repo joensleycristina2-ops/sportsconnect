@@ -52,6 +52,10 @@
       SC.save();
     },
     async unblock(id) { st.blocked = st.blocked.filter(b => b.id !== id); SC.save(); },
-    async saveProfile(p) { st.profile = p; SC.save(); }
+    async saveProfile(p) {
+      st.profile = p;
+      if (p.name) { st.user.name = p.name; st.users.find(u => u.email === st.user.email).name = p.name; }
+      SC.save();
+    }
   };
 })();

@@ -41,7 +41,7 @@
       area: document.getElementById("p-area").value.trim(),
       availability: SC.readAvail()
     });
-    SC.toast("Profile saved");
+    SC.header(); SC.toast("Profile saved");
   });
 
   
