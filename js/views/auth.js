@@ -10,9 +10,16 @@
     $("auth-msg").textContent = msg || ""; $("auth-msg").hidden = !msg;
     $("auth-err").textContent = "";
   }
+  // Shows who is signed in next to the Sign out button; clicking it opens the profile.
   function header() {
-    $("auth-btn").textContent = st.user ? "Sign out" : "Sign in";
-    $("auth-btn").title = st.user ? "Signed in as " + st.user.name : "";
+    const u = st.user;
+    $("auth-btn").textContent = u ? "Sign out" : "Sign in";
+    $("who").hidden = !u;
+    if (!u) return;
+    $("who-name").textContent = u.name;
+    $("who-avatar").textContent = SC.initials(u.name);
+    $("who").title = "Signed in as " + u.name + " (" + u.email + ")";
+    $("who").setAttribute("aria-label", "Signed in as " + u.name + ". Open your profile");
   }
 
   document.querySelectorAll("#auth [data-mode]").forEach(b => b.addEventListener("click", () => { mode = b.dataset.mode; paint(); }));

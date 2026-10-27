@@ -20,7 +20,13 @@
     <button data-view="sessions">Dashboard</button>
     <button data-view="profile">Profile</button>
   </nav>
-  <button class="ghost" id="auth-btn" type="button">Sign in</button>
+  <div class="account">
+    <button class="who" id="who" type="button" data-go="profile" hidden>
+      <span class="avatar" id="who-avatar" aria-hidden="true"></span>
+      <span class="who-text"><span class="who-label">Signed in as</span><span class="who-name" id="who-name"></span></span>
+    </button>
+    <button class="ghost" id="auth-btn" type="button">Sign in</button>
+  </div>
 </header>
 
 <main>
