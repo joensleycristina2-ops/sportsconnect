@@ -38,7 +38,9 @@
     if (err) { $("auth-err").textContent = err; return; }
     const r = await SC.api.register(name, email, pass);
     if (r.error) { $("auth-err").textContent = r.error; return; }
-    e.target.reset(); mode = "signin"; paint("Account created. Please sign in."); $("si-email").value = email;
+    e.target.reset();
+    if (r.signedIn) { header(); SC.toast("Welcome, " + st.user.name); SC.goTo("activities"); return; }
+    mode = "signin"; paint(r.message || "Account created. Please sign in."); $("si-email").value = email;
   });
 
   SC.header = header;

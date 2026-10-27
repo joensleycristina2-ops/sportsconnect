@@ -1,2 +1,2 @@
 // Views only talk to SC.api. Pick the adapter in js/config.js.
-SC.api = SC.config.mode === "remote" ? SC.apiRemote : SC.apiLocal;
+SC.api = { remote: SC.apiRemote, supabase: SC.apiSupabase }[SC.config.mode] || SC.apiLocal;

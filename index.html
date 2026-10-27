@@ -136,6 +136,10 @@
         <div id="p-avail" class="avail" role="group" aria-label="Weekly availability"></div>
         <div class="save-bar"><button class="primary" id="save-profile">Save profile</button></div>
       </div>
+      <div class="card">
+        <label class="field-label">Blocked people</label>
+        <div id="p-blocked"></div>
+      </div>
     </div>
   </section>
 
@@ -166,7 +170,7 @@
       <label class="field-label" for="c-date">Date</label><input type="date" id="c-date" name="date">
       <label class="field-label" for="c-time">Time</label><input type="time" id="c-time" name="time">
       <label class="field-label" for="c-max">Maximum participants</label><input type="number" id="c-max" name="max" min="2" value="8">
-      <label class="field-label" for="c-invite">Invite people</label><input type="text" id="c-invite" name="invite" placeholder="Names or emails, separated by commas">
+      <label class="field-label" for="c-invite">Invite people</label><input type="text" id="c-invite" name="invite" placeholder="Emails, separated by commas">
       <p class="error" id="c-error" role="alert"></p>
       <div class="save-bar"><button type="button" class="ghost" data-go="activities">Cancel</button>&nbsp;<button class="primary" type="submit">Create and send invitations</button></div>
     </form>
@@ -211,6 +215,7 @@
 <script src="js/router.js"></script>
 <script src="js/api/local.js"></script>
 <script src="js/api/remote.js"></script>
+<script src="js/api/supabase.js"></script>
 <script src="js/api/index.js"></script>
 <script src="js/views/discover.js"></script>
 <script src="js/views/sessions.js"></script>

@@ -2,13 +2,14 @@
 CREATE TABLE Users (
   Id NVARCHAR(128) NOT NULL PRIMARY KEY,          -- user id from the sign-in provider
   Name NVARCHAR(100) NOT NULL,
-  Email NVARCHAR(256) NOT NULL UNIQUE,
+  Email NVARCHAR(256) NOT NULL,                   -- not unique: one person can sign in with two providers
   Sport NVARCHAR(50) NULL,
   Level NVARCHAR(20) NULL,
   Area NVARCHAR(100) NULL,                        -- general area, shown to others
   Availability NVARCHAR(MAX) NULL,                -- JSON list such as ["Mon-Morning"]
   CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
+CREATE INDEX IX_Users_Email ON Users (Email);
 
 CREATE TABLE Activities (
   Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
@@ -18,7 +19,7 @@ CREATE TABLE Activities (
   Level NVARCHAR(20) NOT NULL,
   Area NVARCHAR(100) NOT NULL,                    -- shown to everyone
   Place NVARCHAR(200) NOT NULL,                   -- exact place, only returned to confirmed participants
-  StartsAt DATETIME2 NOT NULL,
+  StartsAt DATETIME2 NOT NULL,                   -- UTC
   MaxParticipants INT NOT NULL CHECK (MaxParticipants >= 2)
 );
 CREATE INDEX IX_Activities_StartsAt ON Activities (StartsAt);

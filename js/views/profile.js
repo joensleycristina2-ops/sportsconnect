@@ -10,15 +10,30 @@
 
   // ---- Profile ----
   function loadProfile() {
-    if (!SC.state.profile) return;
-    document.getElementById("p-name").value = SC.state.profile.name || "";
-    document.getElementById("p-sport").value = SC.state.profile.sport || "Running";
-    document.getElementById("p-level").value = SC.state.profile.level || "Beginner";
-    document.getElementById("p-area").value = SC.state.profile.area || "";
-    SC.writeAvail(SC.state.profile.availability || []);
+    const p = SC.state.profile || {};
+    document.getElementById("p-name").value = p.name || "";
+    document.getElementById("p-sport").value = p.sport || "Running";
+    document.getElementById("p-level").value = p.level || "Beginner";
+    document.getElementById("p-area").value = p.area || "";
+    SC.writeAvail(p.availability || []);
+    renderBlocked();
   }
 
+  function renderBlocked() {
+    const box = document.getElementById("p-blocked"), list = SC.state.blocked;
+    box.innerHTML = list.length ? list.map(b => `<div class="partner-row"><div class="partner-info"><div class="partner-name">${SC.esc(b.name)}</div></div>
+      <button class="secondary" data-unblock="${SC.esc(b.id)}">Unblock</button></div>`).join("")
+      : '<div class="partner-meta">You have not blocked anyone.</div>';
+  }
+  document.getElementById("p-blocked").addEventListener("click", async e => {
+    const b = e.target.closest("[data-unblock]");
+    if (!b) return;
+    await SC.api.unblock(b.dataset.unblock);
+    renderBlocked(); SC.toast("Unblocked");
+  });
+
   document.getElementById("save-profile").addEventListener("click", async () => {
+    if (SC.needLogin("Sign in to save your profile")) return;
     await SC.api.saveProfile({
       name: document.getElementById("p-name").value.trim(),
       sport: document.getElementById("p-sport").value,

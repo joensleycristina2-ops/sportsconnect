@@ -14,7 +14,7 @@
       <div class="partner-meta">${new Date(n.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div></div></div>`).join("")
       : '<div class="empty">No notifications yet.</div>';
     if (!st.user) { box.innerHTML = '<div class="empty">Sign in to see your invitations and activities.<br><br><button class="primary" data-go="auth">Sign in</button></div>'; return; }
-    const invites = SC.activities.filter(a => a.invited && !st.responded[a.id] && !st.blocked.includes(a.organizer));
+    const invites = SC.activities.filter(a => a.invited && SC.upcoming(a) && !st.responded[a.id] && !SC.isBlocked(a));
     const mine = SC.all().filter(a => a.mine || st.joined[a.id]);
     const html = invites.map(a => row(a, pill("status-pending", "Invited") + `<button class="secondary" data-decline="${a.id}">Decline</button><button class="primary" data-accept="${a.id}">Accept</button>`)).join("") +
       mine.map(a => row(a, a.mine ? `<span class="tag">${a.joined} of ${a.max} joined${a.invitees && a.invitees.length ? ", " + a.invitees.length + " invited" : ""}</span>`

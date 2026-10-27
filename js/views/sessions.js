@@ -18,19 +18,19 @@
       card.innerHTML = `
         <div class="top-row">
           <div>
-            <div class="partner-name">${s.partnerName}</div>
-            <div class="partner-meta">${s.sport}</div>
+            <div class="partner-name">${SC.esc(s.partnerName)}</div>
+            <div class="partner-meta">${SC.esc(s.sport)}</div>
           </div>
           <span class="status-pill ${pillClass}">${pillLabel}</span>
         </div>
         ${s.status === "confirmed" ? `
           <div class="partner-meta" style="margin-top:10px;">
-            ${s.date || "No date set"} ${s.time ? "at " + s.time : ""}${s.location ? " &middot; " + s.location : ""}
+            ${SC.esc(s.date || "No date set")} ${s.time ? "at " + SC.esc(s.time) : ""}${s.location ? " &middot; " + SC.esc(s.location) : ""}
           </div>
         ` : `
           <div class="schedule-row">
-            <input type="date" data-field="date" data-id="${s.id}" value="${s.date}">
-            <input type="time" data-field="time" data-id="${s.id}" value="${s.time}">
+            <input type="date" data-field="date" data-id="${s.id}" value="${SC.esc(s.date)}">
+            <input type="time" data-field="time" data-id="${s.id}" value="${SC.esc(s.time)}">
             <input type="text" data-field="location" data-id="${s.id}" placeholder="Meeting point" value="${SC.esc(s.location)}">
           </div>
           <div class="save-bar">
