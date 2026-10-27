@@ -9,7 +9,12 @@
   const client = () => ready = ready || new Promise((ok, fail) => {
     const s = document.createElement("script");
     s.src = LIB; s.integrity = SRI; s.crossOrigin = "anonymous";
-    s.onload = () => ok(window.supabase.createClient(SC.config.supabaseUrl, SC.config.supabaseAnonKey));
+    s.onload = () => {
+      const c = window.supabase.createClient(SC.config.supabaseUrl, SC.config.supabaseAnonKey);
+      // The link in the reset email signs the user in and fires this event; then they choose a new password.
+      c.auth.onAuthStateChange(event => { if (event === "PASSWORD_RECOVERY") setTimeout(SC.passwordRecovery); });
+      ok(c);
+    };
     s.onerror = () => { ready = null; fail(new Error("Could not load Supabase")); };
     document.head.appendChild(s);
   });
@@ -42,6 +47,15 @@
     },
     async signIn(email, password) {
       const { error } = await (await client()).auth.signInWithPassword({ email, password });
+      if (error) return { error: authError(error) };
+      await load(); return {};
+    },
+    async requestReset(email) {
+      const { error } = await (await client()).auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+      return error ? { error: authError(error) } : {};
+    },
+    async setPassword(password) {
+      const { error } = await (await client()).auth.updateUser({ password });
       if (error) return { error: authError(error) };
       await load(); return {};
     },

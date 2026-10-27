@@ -28,8 +28,10 @@ Supabase handles the accounts (email and password) and the database. The website
    ```
    The anon key is meant to be public. The tables cannot be read or changed directly; the browser can only call the functions in `schema.sql`, and those check who is signed in. Never put the **service_role** key in the website.
 4. Put the site online with GitHub Pages: in the GitHub repository, **Settings -> Pages**, source **Deploy from a branch**, branch `main`, folder `/ (root)`. The site appears at `https://<your-username>.github.io/sportsconnect/`.
-5. In Supabase, open **Authentication -> URL Configuration** and set **Site URL** to that GitHub Pages address, so the links in confirmation emails open your site.
+5. In Supabase, open **Authentication -> URL Configuration**. Set **Site URL** to that GitHub Pages address, and under **Redirect URLs** add the same address followed by `**` (for example `https://<your-username>.github.io/sportsconnect/**`). The links in confirmation and password reset emails then open your site.
 6. Email confirmation: by default Supabase sends a confirmation email when someone registers, and its built-in mail service only sends a few emails per hour. For testing, turn off **Authentication -> Providers -> Email -> Confirm email**. For real users, keep it on and add your own SMTP server under **Authentication -> Emails**.
+
+Forgot password: the Sign in form has a "Forgot your password?" link. Supabase emails a link; opening it shows a form to choose a new password. The email text can be changed under **Authentication -> Emails -> Reset password**.
 
 Reports go to the `reports` table. Review them in **Table Editor -> reports** and set `status` when handled.
 

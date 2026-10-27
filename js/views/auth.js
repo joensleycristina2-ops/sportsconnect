@@ -5,8 +5,9 @@
 
   function paint(msg) {
     document.querySelectorAll("#auth [data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
-    $("f-signin").hidden = mode !== "signin";
-    $("f-register").hidden = mode !== "register";
+    ["signin", "register", "forgot", "reset"].forEach(m => { $("f-" + m).hidden = mode !== m; });
+    document.querySelector("#auth .tabs").hidden = mode === "reset";
+    $("forgot-link").hidden = !SC.api.requestReset;   // reset by email only exists in the Supabase version
     $("auth-msg").textContent = msg || ""; $("auth-msg").hidden = !msg;
     $("auth-err").textContent = "";
   }
@@ -49,6 +50,30 @@
     if (r.signedIn) { header(); SC.toast("Welcome, " + st.user.name); SC.goTo("activities"); return; }
     mode = "signin"; paint(r.message || "Account created. Please sign in."); $("si-email").value = email;
   });
+
+  $("f-forgot").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = $("fg-email").value.trim().toLowerCase();
+    if (!email.includes("@")) { $("auth-err").textContent = "Enter a valid email."; return; }
+    const r = await SC.api.requestReset(email);
+    if (r.error) { $("auth-err").textContent = r.error; return; }
+    e.target.reset(); mode = "signin"; $("si-email").value = email;
+    paint("If there is an account for " + email + ", we sent it a link to choose a new password. Check your inbox and spam folder.");
+  });
+
+  $("f-reset").addEventListener("submit", async e => {
+    e.preventDefault();
+    const pass = $("rs-pass").value;
+    const err = pass.length < 8 ? "Use a password of at least 8 characters."
+      : pass !== $("rs-pass2").value ? "The two passwords are not the same." : "";
+    if (err) { $("auth-err").textContent = err; return; }
+    const r = await SC.api.setPassword(pass);
+    if (r.error) { $("auth-err").textContent = r.error; return; }
+    e.target.reset(); mode = "signin"; header(); SC.toast("Password changed"); SC.goTo("activities");
+  });
+
+  // Called when someone opens the link from the reset email.
+  SC.passwordRecovery = () => { mode = "reset"; SC.goTo("auth"); paint("Choose a new password for your account."); header(); };
 
   SC.header = header;
   SC.views.auth = () => paint();
