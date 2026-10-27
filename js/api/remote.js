@@ -13,10 +13,7 @@
   }
   async function load() {
     const d = await call("GET", "/bootstrap");
-    // The server stores UTC; show each activity in the viewer's own time zone.
-    SC.activities = d.activities.map(a => { const s = new Date(a.startsAt);
-      return Object.assign(a, { date: s.toLocaleDateString("en-CA"), time: s.toTimeString().slice(0, 5) }); });
-    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, blocked: d.blocked, created: [] });
+    SC.applyBootstrap(d);
   }
   const go = async (method, path, body) => { const r = await call(method, path, body); await load(); return r; };
   const leave = () => new Promise(() => {}); // the page navigates away

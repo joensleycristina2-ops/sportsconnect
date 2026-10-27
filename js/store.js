@@ -30,6 +30,12 @@
     d.showModal();
     return d;
   };
+  // Azure and Supabase return the same bootstrap shape. Times arrive in UTC and are shown in the viewer's time zone.
+  SC.applyBootstrap = d => {
+    SC.activities = d.activities.map(a => { const s = new Date(a.startsAt);
+      return Object.assign(a, { date: s.toLocaleDateString("en-CA"), time: s.toTimeString().slice(0, 5) }); });
+    Object.assign(SC.state, { user: d.user, profile: d.profile, joined: d.joined, responded: d.responded, notes: d.notes, blocked: d.blocked, created: [] });
+  };
   SC.note = text => { SC.state.notes.unshift({ text, at: new Date().toISOString() }); };
   SC.all = () => SC.activities.concat(SC.state.created);
   SC.spots = a => a.max - a.joined - (SC.state.joined[a.id] === "confirmed" ? 1 : 0);
