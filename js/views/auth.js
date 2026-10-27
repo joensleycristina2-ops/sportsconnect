@@ -16,7 +16,8 @@
     const u = st.user;
     $("auth-btn").textContent = u ? "Sign out" : "Sign in";
     $("who").hidden = !u;
-    if (!u) return;
+    document.querySelector('nav [data-view="profile"]').hidden = !u;   // only signed-in users have a profile
+    if (!u) { if ($("profile").classList.contains("active")) SC.goTo("home"); return; }
     $("who-name").textContent = u.name;
     $("who-avatar").textContent = SC.initials(u.name);
     $("who").title = "Signed in as " + u.name + " (" + u.email + ")";

@@ -3,6 +3,7 @@
   const views = ["home", "discover", "activities", "create", "sessions", "profile", "auth"];
   SC.goTo = v => {
     if (!views.includes(v)) v = "home";
+    if (v === "profile" && SC.needLogin("Sign in to see your profile")) return;   // the profile belongs to an account
     document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.view === v));
     document.querySelectorAll(".view").forEach(x => x.classList.toggle("active", x.id === v));
     if (SC.views[v]) SC.views[v]();
